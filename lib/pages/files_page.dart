@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task/cubit.dart';
 import 'package:task/file_manager.dart';
-import 'package:task/file_repository.dart';
-import 'package:task/states.dart';
+
 
 class FilesProgress extends StatefulWidget {
   const FilesProgress({Key? key}) : super(key: key);
