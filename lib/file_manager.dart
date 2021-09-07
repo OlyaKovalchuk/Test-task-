@@ -2,50 +2,68 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-enum StatusEvent { loading, loaded, queued }
+enum StatusEvent { loading, loaded, queued, overcrowed }
 
 class Files {
   late String id;
-  late StatusEvent status;
+  late StatusEvent statusEvent;
+  late String status;
 
-  Files(this.id, this.status);
+  Files(this.id, this.statusEvent, this.status);
 }
 
 class FileManager {
+  late int numOfLoadedFiles = 0;
+  late int numOfLoadingFiles = 0;
+  late int numOfQueuedFiles = 0;
   var _currentlyLoading = <Files>[];
   var _queue = Queue<Files>();
-  var _loadedFile = <Files>[];
+  var loadedFile = <Files>[];
 
-  StreamController<List<Files>> _controller = StreamController<List<Files>>();
-  late Stream<List<Files>> stream;
+  final _inputEventController = StreamController<StatusEvent>();
 
-  FileManager() {
-    stream = _controller.stream;
+  StreamSink<StatusEvent> get inputEventSink => _inputEventController.sink;
+
+  final _outputStateController = StreamController<List<Files>>.broadcast();
+
+  Stream<List<Files>> get outputStateStream => _outputStateController.stream;
+
+  FileManager._privateConstructor();
+
+  static final FileManager _instance = FileManager._privateConstructor();
+
+  factory FileManager() {
+    return _instance;
   }
-  _updateStreamFile(){
-    _controller.add(_currentlyLoading + _queue.toList() + _loadedFile);
 
+  void dispose() {
+    _inputEventController.close();
+    _outputStateController.close();
   }
 
-  // FileManager() {
-  //   _inputEventController.stream.listen((event) { });
-  // }
-
+  _updateStreamFile() {
+    _outputStateController
+        .add(_currentlyLoading + _queue.toList() + loadedFile);
+  }
 
   addFile() {
-    Files _newFile = Files(generateRandomString(5), StatusEvent.queued);
+    Files _newFile =
+        Files(_generateRandomString(5), StatusEvent.queued, 'Queued');
     if (_canLoadMoreFiles()) {
       _loadFile(_newFile);
+    } else {
+      _queue.add(_newFile);
+      _newFile.status = 'Queued';
+      numOfQueuedFiles++;
     }
-    // else if(_countFile()== false) {
-    //   print('too many files');}
-      else{_queue.add(_newFile);}
     _updateStreamFile();
   }
 
   _loadFile(Files _file) {
-    _file.status = StatusEvent.loading;
+    _file.statusEvent = StatusEvent.loading;
+    _file.status = 'Loading';
     _currentlyLoading.add(_file);
+    numOfLoadingFiles++;
     _fakeLoadFile(_file);
   }
 
@@ -54,21 +72,26 @@ class FileManager {
       var rn = new Random();
       return min + rn.nextInt(max - min);
     }
+
     Duration delay = Duration(seconds: random(3, 10));
     Timer(delay, () {
       Files? _fileToUpdate =
           _currentlyLoading.firstWhere((file) => file.id == _fileToLoad.id);
       _currentlyLoading.remove(_fileToUpdate);
-      _fileToUpdate.status = StatusEvent.loaded;
-      _loadedFile.add(_fileToUpdate);
+      numOfLoadingFiles--;
+      _fileToUpdate.statusEvent = StatusEvent.loaded;
+      _fileToUpdate.status = 'Loaded';
+      loadedFile.add(_fileToUpdate);
+      numOfLoadedFiles++;
       _checkQueuedFiles();
       _updateStreamFile();
     });
   }
 
-  _checkQueuedFiles(){
-    if(_canLoadMoreFiles() && _queue.isNotEmpty){
+  _checkQueuedFiles() {
+    if (_canLoadMoreFiles() && _queue.isNotEmpty) {
       Files _fileToLoad = _queue.removeFirst();
+      numOfQueuedFiles--;
       _loadFile(_fileToLoad);
       _updateStreamFile();
     }
@@ -78,26 +101,22 @@ class FileManager {
     return _currentlyLoading.length < 3;
   }
 
-  String generateRandomString(int len) {
+  String _generateRandomString(int len) {
     var r = Random();
     return String.fromCharCodes(
         List.generate(len, (index) => r.nextInt(33) + 89));
   }
 
-  // _countFile(){
-  //   if(_currentlyLoading.length + _queue.length + _loadedFile.length == 30)
-  //     return false;
-  //
-  //
-  // }
-
   update() {
     _updateStreamFile();
   }
-  clear(){
+
+  clear() {
     _currentlyLoading.clear();
-    _loadedFile.clear();
+    loadedFile.clear();
     _queue.clear();
+    numOfLoadedFiles = 0;
+    numOfLoadingFiles = 0;
     update();
   }
 }

@@ -4,11 +4,10 @@ import 'package:task/pages/home_page.dart';
 
 void main() {
   runApp(MaterialApp(
-      debugShowCheckedModeBanner: false,
-
-      routes: {
-    '/file': (context) => const FilesProgress(),
-  },
-      home: HomePage()));
+    debugShowCheckedModeBanner: false,
+    routes: {
+      '/file': (context) => const FilesProgress(),
+    },
+    home: MenuItem(),
+  ));
 }
-
