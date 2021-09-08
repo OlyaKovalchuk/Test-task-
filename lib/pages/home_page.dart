@@ -24,7 +24,7 @@ class _MenuItemState extends State<MenuItem> {
         ),
       ),
       body: StreamBuilder(
-          initialData: <Files>[],
+          initialData: _fileManager.allFiles,
           stream: _fileManager.outputStateStream,
           builder: (context, AsyncSnapshot<List<Files>> snapshot) {
             return Center(
@@ -105,7 +105,7 @@ class _MenuItemState extends State<MenuItem> {
       return null;
     } else {
       return () {
-        _fileManager.clear();
+        _fileManager.clearFile();
         return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('You deleted files'),
           backgroundColor: Colors.red,

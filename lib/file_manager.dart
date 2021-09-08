@@ -20,6 +20,8 @@ class FileManager {
   var _queue = Queue<Files>();
   var loadedFile = <Files>[];
 
+  List<Files> get allFiles => _currentlyLoading + _queue.toList() + loadedFile;
+
   final _inputEventController = StreamController<StatusEvent>();
 
   StreamSink<StatusEvent> get inputEventSink => _inputEventController.sink;
@@ -107,16 +109,31 @@ class FileManager {
         List.generate(len, (index) => r.nextInt(33) + 89));
   }
 
+  delete(Files _fileToDelete) {
+    if (_fileToDelete.statusEvent == StatusEvent.loaded) {
+      loadedFile.remove(_fileToDelete);
+      numOfLoadedFiles--;
+    } else if (_fileToDelete.statusEvent == StatusEvent.loading) {
+      _currentlyLoading.remove(_fileToDelete);
+      numOfLoadingFiles--;
+    } else {
+      _queue.remove(_fileToDelete);
+      numOfQueuedFiles--;
+    }
+    _updateStreamFile();
+  }
+
   update() {
     _updateStreamFile();
   }
 
-  clear() {
-    _currentlyLoading.clear();
+  clearFile() {
     loadedFile.clear();
+    _currentlyLoading.clear();
     _queue.clear();
     numOfLoadedFiles = 0;
     numOfLoadingFiles = 0;
-    update();
+    numOfQueuedFiles = 0;
+    _updateStreamFile();
   }
 }

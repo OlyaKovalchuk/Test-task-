@@ -16,27 +16,32 @@ class _FilesProgressState extends State<FilesProgress> {
     return Scaffold(
         appBar: AppBar(),
         floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add), onPressed: () => _isClicked()),
+            child: Icon(Icons.add), onPressed: () => _counterOfFiles()),
         body: StreamBuilder(
-          initialData: _fileManager.loadedFile,
+          initialData: _fileManager.allFiles,
           stream: _fileManager.outputStateStream,
           builder: (context, AsyncSnapshot<List<Files>> snapshot) {
             return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    ListBody(
-                      children: [
-                        ListTile(
-                          title: Text(snapshot.data![index].id),
-                          subtitle: Text(snapshot.data![index].status),
-                        ),
-                      ],
-                    ),);
+              itemCount: snapshot.data!.length,
+              itemBuilder: (BuildContext context, int index) => ListBody(
+                children: [
+                  ListTile(
+                      title: Text(snapshot.data![index].id),
+                      subtitle: Text(snapshot.data![index].status),
+                      trailing: _deleteButton(snapshot.data![index])),
+                ],
+              ),
+            );
           },
         ));
   }
 
-  _isClicked() {
+  IconButton _deleteButton(Files _fileToDelete) => IconButton(
+        onPressed: () => _fileManager.delete(_fileToDelete),
+        icon: Icon(Icons.delete),
+      );
+
+  _counterOfFiles() {
     if (_fileManager.numOfLoadedFiles +
             _fileManager.numOfLoadingFiles +
             _fileManager.numOfQueuedFiles >=
