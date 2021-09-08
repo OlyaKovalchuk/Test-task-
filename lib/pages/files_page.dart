@@ -23,7 +23,8 @@ class _FilesProgressState extends State<FilesProgress> {
           builder: (context, AsyncSnapshot<List<Files>> snapshot) {
             return ListView.builder(
                 itemCount: snapshot.data!.length,
-                itemBuilder: (BuildContext context, int index) => ListBody(
+                itemBuilder: (BuildContext context, int index) =>
+                    ListBody(
                       children: [
                         ListTile(
                           title: Text(snapshot.data![index].id),
