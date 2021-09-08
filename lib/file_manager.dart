@@ -13,14 +13,11 @@ class Files {
 }
 
 class FileManager {
-  int numOfLoadedFiles = 0;
-  int numOfLoadingFiles = 0;
-  int numOfQueuedFiles = 0;
-  var _currentlyLoading = <Files>[];
-  var _queue = Queue<Files>();
+  var currentlyLoading = <Files>[];
+  var queue = Queue<Files>();
   var loadedFile = <Files>[];
 
-  List<Files> get allFiles => _currentlyLoading + _queue.toList() + loadedFile;
+  List<Files> get allFiles => currentlyLoading + queue.toList() + loadedFile;
 
   final _inputEventController = StreamController<StatusEvent>();
 
@@ -44,8 +41,7 @@ class FileManager {
   }
 
   _updateStreamFile() {
-    _outputStateController
-        .add(_currentlyLoading + _queue.toList() + loadedFile);
+    _outputStateController.add(currentlyLoading + queue.toList() + loadedFile);
   }
 
   addFile() {
@@ -54,9 +50,8 @@ class FileManager {
     if (_canLoadMoreFiles()) {
       _loadFile(_newFile);
     } else {
-      _queue.add(_newFile);
+      queue.add(_newFile);
       _newFile.status = 'Queued';
-      numOfQueuedFiles++;
     }
     _updateStreamFile();
   }
@@ -64,8 +59,7 @@ class FileManager {
   _loadFile(Files _file) {
     _file.statusEvent = StatusEvent.loading;
     _file.status = 'Loading';
-    _currentlyLoading.add(_file);
-    numOfLoadingFiles++;
+    currentlyLoading.add(_file);
     _fakeLoadFile(_file);
   }
 
@@ -78,29 +72,26 @@ class FileManager {
     Duration delay = Duration(seconds: random(3, 10));
     Timer(delay, () {
       Files? _fileToUpdate =
-          _currentlyLoading.firstWhere((file) => file.id == _fileToLoad.id);
-      _currentlyLoading.remove(_fileToUpdate);
-      numOfLoadingFiles--;
+          currentlyLoading.firstWhere((file) => file.id == _fileToLoad.id);
+      currentlyLoading.remove(_fileToUpdate);
       _fileToUpdate.statusEvent = StatusEvent.loaded;
       _fileToUpdate.status = 'Loaded';
       loadedFile.add(_fileToUpdate);
-      numOfLoadedFiles++;
       _checkQueuedFiles();
       _updateStreamFile();
     });
   }
 
   _checkQueuedFiles() {
-    if (_canLoadMoreFiles() && _queue.isNotEmpty) {
-      Files _fileToLoad = _queue.removeFirst();
-      numOfQueuedFiles--;
+    if (_canLoadMoreFiles() && queue.isNotEmpty) {
+      Files _fileToLoad = queue.removeFirst();
       _loadFile(_fileToLoad);
       _updateStreamFile();
     }
   }
 
   bool _canLoadMoreFiles() {
-    return _currentlyLoading.length < 3;
+    return currentlyLoading.length < 3;
   }
 
   String _generateRandomString(int len) {
@@ -112,13 +103,10 @@ class FileManager {
   delete(Files _fileToDelete) {
     if (_fileToDelete.statusEvent == StatusEvent.loaded) {
       loadedFile.remove(_fileToDelete);
-      numOfLoadedFiles--;
     } else if (_fileToDelete.statusEvent == StatusEvent.loading) {
-      _currentlyLoading.remove(_fileToDelete);
-      numOfLoadingFiles--;
+      currentlyLoading.remove(_fileToDelete);
     } else {
-      _queue.remove(_fileToDelete);
-      numOfQueuedFiles--;
+      queue.remove(_fileToDelete);
     }
     _updateStreamFile();
   }
@@ -129,11 +117,8 @@ class FileManager {
 
   clearFile() {
     loadedFile.clear();
-    _currentlyLoading.clear();
-    _queue.clear();
-    numOfLoadedFiles = 0;
-    numOfLoadingFiles = 0;
-    numOfQueuedFiles = 0;
+    currentlyLoading.clear();
+    queue.clear();
     _updateStreamFile();
   }
 }

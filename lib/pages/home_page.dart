@@ -44,7 +44,7 @@ class _MenuItemState extends State<MenuItem> {
                           height: 15,
                         ),
                         Text(
-                          'currently loading: ${_fileManager.numOfLoadingFiles}',
+                          'currently loading: ${_fileManager.currentlyLoading.length}',
                           style: Theme.of(context).textTheme.subtitle2,
                         ),
                         SizedBox(
@@ -72,14 +72,14 @@ class _MenuItemState extends State<MenuItem> {
   }
 
   Text _textLoadedFiles() {
-    if (_fileManager.numOfLoadedFiles == 0) {
+    if (_fileManager.loadedFile.length == 0) {
       return Text(
         'No files',
         style: Theme.of(context).textTheme.subtitle1,
       );
     } else {
       return Text(
-        'All files: ${_fileManager.numOfLoadedFiles}',
+        'All files: ${_fileManager.loadedFile.length}',
         style: Theme.of(context).textTheme.subtitle1,
       );
     }
@@ -98,7 +98,7 @@ class _MenuItemState extends State<MenuItem> {
     }
   }
 
-  bool _checkLoadedFiles() => _fileManager.numOfLoadedFiles == 0;
+  bool _checkLoadedFiles() => _fileManager.loadedFile.length == 0;
 
   _resetButton() {
     if (_checkLoadedFiles()) {

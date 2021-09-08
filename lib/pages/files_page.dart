@@ -42,9 +42,9 @@ class _FilesProgressState extends State<FilesProgress> {
       );
 
   _counterOfFiles() {
-    if (_fileManager.numOfLoadedFiles +
-            _fileManager.numOfLoadingFiles +
-            _fileManager.numOfQueuedFiles >=
+    if (_fileManager.loadedFile.length +
+            _fileManager.currentlyLoading.length +
+            _fileManager.queue.length >=
         30) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("You can't add more than 30 files "),
