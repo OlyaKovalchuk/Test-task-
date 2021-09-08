@@ -18,7 +18,7 @@ class _FilesProgressState extends State<FilesProgress> {
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add), onPressed: () => _isClicked()),
         body: StreamBuilder(
-          initialData: <Files>[],
+          initialData: _fileManager.loadedFile,
           stream: _fileManager.outputStateStream,
           builder: (context, AsyncSnapshot<List<Files>> snapshot) {
             return ListView.builder(
@@ -28,9 +28,9 @@ class _FilesProgressState extends State<FilesProgress> {
                         ListTile(
                           title: Text(snapshot.data![index].id),
                           subtitle: Text(snapshot.data![index].status),
-                        )
+                        ),
                       ],
-                    ));
+                    ),);
           },
         ));
   }
@@ -44,7 +44,6 @@ class _FilesProgressState extends State<FilesProgress> {
         content: Text("You can't add more than 30 files "),
         backgroundColor: Colors.red,
       ));
-      return null;
     } else {
       _fileManager.addFile();
     }

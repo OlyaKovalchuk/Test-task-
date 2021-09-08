@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
-enum StatusEvent { loading, loaded, queued, overcrowed }
+enum StatusEvent { loading, loaded, queued }
 
 class Files {
   late String id;
@@ -13,9 +13,9 @@ class Files {
 }
 
 class FileManager {
-  late int numOfLoadedFiles = 0;
-  late int numOfLoadingFiles = 0;
-  late int numOfQueuedFiles = 0;
+  int numOfLoadedFiles = 0;
+  int numOfLoadingFiles = 0;
+  int numOfQueuedFiles = 0;
   var _currentlyLoading = <Files>[];
   var _queue = Queue<Files>();
   var loadedFile = <Files>[];
